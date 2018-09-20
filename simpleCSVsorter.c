@@ -1,43 +1,45 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "simpleCSVsorter.h"
 
 
-// Struct 
-typedef struct {
+// Struct
+struct movieRecord {
     char *color;
     int number;
     char *animal;
-} MovieRecord;
-
-// Pointer-To-Struct
-typedef MovieRecord *pMovieRecord;
+};
 
 void printArguments(int argCount, char *argArray[]);
-void processInput(pMovieRecord *arrMovieRecords);
+void processInput(struct movieRecord **arrayOfPtrsToMovieRecords);
 
 
 int main(int argc, char *argv[])
 {
     //printArguments(argc, argv);
     
-    MovieRecord movieA;
-    movieA.color = "blue";
-    movieA.number = 7;
-    movieA.animal = "cat";
-
     // initialize array of struct MovieMetaData pointers, initial size is 5 => will dynamically resize as needed
-    //struct MovieMetaData **arrMovies = (struct MovieMetaData **)malloc(sizeof(struct MovieMetaData)*5);
-    pMovieRecord *arrMovieRecords = (pMovieRecord *)malloc(sizeof(pMovieRecord)*5);
+    struct movieRecord *arrMovieRecords = (struct movieRecord *)malloc(sizeof(struct movieRecord)*5);
     if (arrMovieRecords == NULL)
     {
         fprintf(stderr, "Malloc Failed to allocate memory for arrMovieRecords");
         return -1;
     }
-    arrMovieRecords[0] = &movieA;
+
+    struct movieRecord movieA = { .color = "red", .number = 77, .animal = "goose" };
+    arrMovieRecords[0] = movieA;
+    printf("movieA: color=%s number=%d animal=%s\n", arrMovieRecords[0].color, arrMovieRecords[0].number, arrMovieRecords[0].animal);
+
+    // create array that holds 5 movieRecord pointers (5 pointers that each point to a movieRecord)
+    struct movieRecord **arrayOfPtrsToMovieRecords = (struct movieRecord **)malloc(sizeof(struct movieRecord *)*5);;
+    arrayOfPtrsToMovieRecords[0] = &movieA;
+    printf("movieA: color=%s number=%d animal=%s\n", arrayOfPtrsToMovieRecords[0]->color, arrayOfPtrsToMovieRecords[0]->number, arrayOfPtrsToMovieRecords[0]->animal);
 
     // get input from csv
+    processInput(arrayOfPtrsToMovieRecords);
+    /**
     char *buffer = (char*)malloc(sizeof(char)*2000);
     int lineNumber = 0;
 
@@ -45,23 +47,20 @@ int main(int argc, char *argv[])
     {
         if (strcmp(buffer,"\n") != 0)
         {
-            //MovieRecord tempMovieRecord = { .color = buffer };
-            MovieRecord *tempMovieRecord = (MovieRecord *)malloc(sizeof(MovieRecord));
-            tempMovieRecord->color = buffer;
-            arrMovieRecords[lineNumber++] = tempMovieRecord;
-            printf("BUFFER:\t%s\n", arrMovieRecords[lineNumber-1]->color);
+            arrayOfPtrsToMovieRecords[lineNumber] = (struct movieRecord *)malloc(sizeof(struct movieRecord));
+            arrayOfPtrsToMovieRecords[lineNumber]->color = buffer;
+            printf("BUFFER:\t%s\n", arrayOfPtrsToMovieRecords[lineNumber]->color);
+            lineNumber++;
         }
     }
     
-    printf("BUFFER:\t%s\n", arrMovieRecords[0]->color);
+    //printf("BUFFER:\t%s\n", arrMovieRecords[0]->color);
 
     //processOutput();
     
     free(buffer);
-
-    return;    
-    
-    free(arrMovieRecords);
+    free(arrayOfPtrsToMovieRecords);
+    */
     return 0;
 }
 
@@ -77,8 +76,9 @@ void printArguments(int argCount, char *argArray[])
     return;
 }
 
-void processInput(pMovieRecord *arrMovieRecords)
+void processInput(struct movieRecord **arrayOfPtrsToMovieRecords) 
 {
+    // get input from csv
     char *buffer = (char*)malloc(sizeof(char)*2000);
     int lineNumber = 0;
 
@@ -86,17 +86,30 @@ void processInput(pMovieRecord *arrMovieRecords)
     {
         if (strcmp(buffer,"\n") != 0)
         {
-            //MovieRecord tempMovieRecord = { .color = buffer };
-            MovieRecord *tempMovieRecord = (MovieRecord *)malloc(sizeof(MovieRecord));
-            tempMovieRecord->color = buffer;
-            arrMovieRecords[lineNumber++] = tempMovieRecord;
-            printf("BUFFER:\t%s\n", arrMovieRecords[lineNumber-1]->color);
+            arrayOfPtrsToMovieRecords[lineNumber] = (struct movieRecord *)malloc(sizeof(struct movieRecord));
+
+            const char *DELIMITER = ",";
+            char *stringToken;
+            stringToken = strtok(buffer, DELIMITER); 
+            while(stringToken != NULL)
+            {
+                arrayOfPtrsToMovieRecords[lineNumber]->color = stringToken;
+                stringToken = strtok(NULL, DELIMITER);
+                printf("number: %s\n", stringToken);
+                arrayOfPtrsToMovieRecords[lineNumber]->number= atoi(stringToken);
+                stringToken = strtok(NULL, DELIMITER);
+                arrayOfPtrsToMovieRecords[lineNumber]->animal= stringToken;
+                stringToken = strtok(NULL, DELIMITER);
+            }
+            printf("movieA: color=%s number=%d animal=%s\n", arrayOfPtrsToMovieRecords[lineNumber]->color, arrayOfPtrsToMovieRecords[lineNumber]->number, arrayOfPtrsToMovieRecords[lineNumber]->animal);
+            lineNumber++;
         }
     }
     
-    printf("BUFFER:\t%s\n", arrMovieRecords[0]->color);
-
     free(buffer);
+    free(arrayOfPtrsToMovieRecords);
 
     return;
 }
+
+

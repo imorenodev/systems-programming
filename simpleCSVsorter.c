@@ -13,6 +13,7 @@ struct MovieRecord {
 };
 
 void printArguments(int argCount, char *argArray[]);
+char **getArrayOfTokens(char * stringBuffer, const char *delimiter);
 
 
 int main(int argc, char *argv[])
@@ -45,46 +46,57 @@ int main(int argc, char *argv[])
         printf("arrayOfMovieRecords[%d]\tcolor: %s\tnumber: %d\tanimal: %s\t\n", i, movie->color, movie->number, movie->animal); 
     }
 
-    /*
-    // get input from csv
-    //processInput(arrayOfPtrsToMovieRecords);
-    // get input from csv
-    char *buffer = (char*)malloc(sizeof(char)*2000);
-    int lineNumber = 0;
+    printf("\n");
 
-    while (fgets(buffer, 2000, stdin) != NULL)
+    // get input from csv
+    //char *buffer = (char*)malloc(sizeof(char)*2000);
+    char buffer[4];
+    char *bufferString = 0;
+    size_t currentLength = 0;
+    size_t currentMaxLength = 0;
+
+    while (fgets(buffer, sizeof(buffer), stdin) != NULL)
     {
+        size_t bufferLength = strlen(buffer);
+        if ((currentLength + bufferLength + 1) > currentMaxLength)
+        {
+            size_t newLength = ((currentMaxLength*2) + 1);
+
+            if ((bufferLength + 1) > newLength)
+            {
+                newLength = (bufferLength + 1);
+            }
+
+            char *tempBufferString = realloc(bufferString, newLength);
+
+            if (tempBufferString == 0)
+            {
+                break;
+            }
+            bufferString = tempBufferString;
+            currentMaxLength = newLength;
+        }
+        strcpy(bufferString + currentLength, buffer);
+        currentLength += bufferLength;
+
+    }
+    printf("%s [%d]\n", bufferString, (int)strlen(bufferString));
+
+        /** temp comment out
         if (strcmp(buffer,"\n") != 0)
         {
+            printf("BUFFER:\t%s", buffer);
+
             const char *DELIMITER = ",";
-            // get first comma-delimited "token" from first line of stdin input
-            char *stringToken = malloc(sizeof(char)*20);
-            stringToken = strtok(buffer, DELIMITER);
 
-            while(stringToken != NULL)
+            char **arrayOfTokens = getArrayOfTokens(buffer, DELIMITER);
+
+            for (int i = 0; i < 30; i++) 
             {
-                // iterate to a movieRecord-pointer in the array and assign it the address to a piece of memory 
-                // to hold a future movieRecord-struct
-                arrayOfPtrsToMovieRecords[lineNumber] = (struct movieRecord *)malloc(sizeof(struct movieRecord));
-
-                arrayOfPtrsToMovieRecords[lineNumber]->color = stringToken;
-                stringToken = strtok(NULL, DELIMITER);
-                arrayOfPtrsToMovieRecords[lineNumber]->number= atoi(stringToken);
-                stringToken = strtok(NULL, DELIMITER);
-                arrayOfPtrsToMovieRecords[lineNumber]->animal= stringToken;
-                stringToken = strtok(NULL, DELIMITER);
+                printf("TOKEN LENGTH:\t%lu\tTOKEN:%s\n\n", strlen(arrayOfTokens[i]), arrayOfTokens[i]);
             }
-            //printf("movieA: color=%s number=%d animal=%s\n", arrayOfPtrsToMovieRecords[lineNumber]->color, arrayOfPtrsToMovieRecords[lineNumber]->number, arrayOfPtrsToMovieRecords[lineNumber]->animal);
-            lineNumber++;
         }
-    }
-
-    printf("movieA: color=%s number=%d animal=%s\n", arrayOfPtrsToMovieRecords[0]->color, arrayOfPtrsToMovieRecords[0]->number, arrayOfPtrsToMovieRecords[0]->animal);
-    printf("movieA: color=%s number=%d animal=%s\n", arrayOfPtrsToMovieRecords[1]->color, arrayOfPtrsToMovieRecords[2]->number, arrayOfPtrsToMovieRecords[2]->animal);
- 
-
-    //processOutput(arrayOfPtrsToMovieRecords);
-    */
+        **/
 
     return 0;
 }
@@ -99,4 +111,24 @@ void printArguments(int argCount, char *argArray[])
     }
 
     return;
+}
+
+char **getArrayOfTokens(char * stringBuffer, const char *delimiter)
+{
+    // initilize array to hold each token
+    char **arrayOfTokens = (char **)malloc(sizeof(char *)*30); 
+    // declare char[] to hold each token string as it is processed and assign first string returned from strtok
+    char *stringToken = strtok(stringBuffer, delimiter); 
+
+    int i = 0;
+
+    while (stringToken != NULL)
+    {
+        arrayOfTokens[i] = (char *)malloc(sizeof(strlen(stringToken)+1)*sizeof(char));
+        strcpy(arrayOfTokens[i], stringToken);
+        stringToken = strtok(NULL, delimiter);
+        i++;
+    }
+
+    return arrayOfTokens;
 }

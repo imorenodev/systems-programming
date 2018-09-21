@@ -1,5 +1,4 @@
-col_1,2,col_3
+orange,2,cow
 red,7,turtle
 blue,6,bird
 yellow,1,fish
-

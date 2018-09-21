@@ -9,6 +9,8 @@
 ******/
 
 static const char *DEBUGGING = "**DEBUGGING**\t";
+static const char *DELIMITER= ",";
+static const int MAX_LINE_LENGTH = 512;
 
 //Suggestion: define a struct that mirrors a record (row) of the data set
 

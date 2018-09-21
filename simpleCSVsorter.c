@@ -13,15 +13,17 @@ struct MovieRecord {
 };
 
 void printArguments(int argCount, char *argArray[]);
+void printMovieRecords(struct MovieRecord *arrayOfMovieRecords, int lengthOfArrayOfMovieRecords);
 char **getArrayOfTokens(char * stringBuffer, const char *delimiter);
+int getLine(char line[], int maxLength);
 
 
 int main(int argc, char *argv[])
 {
     //printArguments(argc, argv);
     
-    // create array that holds 5 movieRecord pointers (5 pointers that each point to a movieRecord)
-    struct MovieRecord *arrayOfMovieRecords = malloc(sizeof(struct MovieRecord) * 5);
+    // create array that holds 10 movieRecord pointers (10 pointers that each point to a movieRecord)
+    struct MovieRecord **arrayOfMovieRecords = malloc(sizeof(struct MovieRecord *) * 10);
 
     if (arrayOfMovieRecords == NULL)
     {
@@ -45,58 +47,30 @@ int main(int argc, char *argv[])
         movie = &(arrayOfMovieRecords[i]);
         printf("arrayOfMovieRecords[%d]\tcolor: %s\tnumber: %d\tanimal: %s\t\n", i, movie->color, movie->number, movie->animal); 
     }
+    */
 
     printf("\n");
 
     // get input from csv
-    //char *buffer = (char*)malloc(sizeof(char)*2000);
-    char buffer[4];
-    char *bufferString = 0;
-    size_t currentLength = 0;
-    size_t currentMaxLength = 0;
+    char line[MAX_LINE_LENGTH];
+    char **arrayOfTokens = malloc(sizeof(char *)*30);
 
-    while (fgets(buffer, sizeof(buffer), stdin) != NULL)
+    for (int i = 0; i < 4; i++)
     {
-        size_t bufferLength = strlen(buffer);
-        if ((currentLength + bufferLength + 1) > currentMaxLength)
+        while (getLine(line, MAX_LINE_LENGTH) != EOF)
         {
-            size_t newLength = ((currentMaxLength*2) + 1);
-
-            if ((bufferLength + 1) > newLength)
-            {
-                newLength = (bufferLength + 1);
-            }
-
-            char *tempBufferString = realloc(bufferString, newLength);
-
-            if (tempBufferString == 0)
-            {
-                break;
-            }
-            bufferString = tempBufferString;
-            currentMaxLength = newLength;
+            //printf("you typed \"%s\"\n", line);
+            arrayOfTokens = getArrayOfTokens(line, DELIMITER);
+            //printf("arrayOfTokens:\tcolor:%s\tnumber:%s\tanimal:%s\n", arrayOfTokens[0], arrayOfTokens[1], arrayOfTokens[2]);
+            
+            arrayOfMovieRecords[i].color = arrayOfTokens[0];
+            arrayOfMovieRecords[i].number = atoi(arrayOfTokens[1]);
+            arrayOfMovieRecords[i].animal = arrayOfTokens[2];
         }
-        strcpy(bufferString + currentLength, buffer);
-        currentLength += bufferLength;
 
     }
-    printf("%s [%d]\n", bufferString, (int)strlen(bufferString));
 
-        /** temp comment out
-        if (strcmp(buffer,"\n") != 0)
-        {
-            printf("BUFFER:\t%s", buffer);
-
-            const char *DELIMITER = ",";
-
-            char **arrayOfTokens = getArrayOfTokens(buffer, DELIMITER);
-
-            for (int i = 0; i < 30; i++) 
-            {
-                printf("TOKEN LENGTH:\t%lu\tTOKEN:%s\n\n", strlen(arrayOfTokens[i]), arrayOfTokens[i]);
-            }
-        }
-        **/
+    printMovieRecords(arrayOfMovieRecords, 4);
 
     return 0;
 }
@@ -113,7 +87,7 @@ void printArguments(int argCount, char *argArray[])
     return;
 }
 
-char **getArrayOfTokens(char * stringBuffer, const char *delimiter)
+char **getArrayOfTokens(char *stringBuffer, const char *delimiter)
 {
     // initilize array to hold each token
     char **arrayOfTokens = (char **)malloc(sizeof(char *)*30); 
@@ -131,4 +105,42 @@ char **getArrayOfTokens(char * stringBuffer, const char *delimiter)
     }
 
     return arrayOfTokens;
+}
+
+void printMovieRecords(struct MovieRecord *arrayOfMovieRecords, int lengthOfArrayOfMovieRecords)
+{
+   for (int i = 0; i < lengthOfArrayOfMovieRecords; i++)
+   {
+        printf("%s,%d,%s\n", arrayOfMovieRecords[i].color, arrayOfMovieRecords[i].number, arrayOfMovieRecords[i].animal);
+   }
+
+   return;
+}
+
+int getLine(char line[], int maxLength)
+{
+    int index = 0;
+    char aChar;
+    // want to leave space for '\0'
+    int maxStringLength = maxLength - 1;
+
+    while ((aChar = getchar()) != EOF)
+    {
+        if (aChar == '\n')
+        {
+            break;
+        }
+
+        if (index < maxStringLength)
+        {
+            line[index] = aChar;
+            index++;
+        }
+    }
+
+    if (aChar == EOF && (index == 0))
+        return EOF;
+
+    line[index] = '\0';
+    return index;
 }

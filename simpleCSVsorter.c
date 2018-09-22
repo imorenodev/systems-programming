@@ -5,9 +5,16 @@
 #include "simpleCSVsorter.h"
 
 
+
 int main(int argc, char *argv[])
 {
-    //printArguments(argc, argv);
+    printArguments(argc, argv);
+
+    if (isValidArguments(argc, argv) != 0) 
+    {
+        return -1;
+    }
+    const char *columnName = argv[2];
     
     // create array that holds 10 movieRecord pointers (10 pointers that each point to a movieRecord)
     struct MovieRecord *arrayOfMovies[MAX_NUM_RECORDS];
@@ -48,7 +55,7 @@ int main(int argc, char *argv[])
         count++;
     }
 
-    // create new array of pointers to struct MovieRecords to hold accurate number of MoveRecords
+    // create new array of pointers to struct MovieRecords to hold accurate number of MovieRecords
     struct MovieRecord *unSortedArrayOfMovies[count];
     initializeArrayOfMovies(count, unSortedArrayOfMovies);
     // copy contents of oversized array of MovieRecords to new array of correct size
@@ -59,10 +66,12 @@ int main(int argc, char *argv[])
     initializeArrayOfMovies(count, sortedArrayOfMovies);
 
     // sort the records and save sorted output in sortedArrayOfMovies
-    mergeSort(count, arrayOfMovies, sortedArrayOfMovies);
+    mergeSort(count, columnName, arrayOfMovies, sortedArrayOfMovies);
 
+    /**
     printf("Orignial Array\n");
     printMovieRecords(count, unSortedArrayOfMovies);
+    **/
     printf("\nSorted Array\n");
     printMovieRecords(count, sortedArrayOfMovies);
 
@@ -175,9 +184,8 @@ void copyArrayOfMovies(int count, struct MovieRecord **sourceArray, struct Movie
     return;
 }
 
-void mergeSort(int count, struct MovieRecord **sourceArray, struct MovieRecord **outputArray)
+void mergeSort(int count, const char *columnName, struct MovieRecord **sourceArray, struct MovieRecord **outputArray)
 {
-    //printf("count: %d\n", count);
     struct MovieRecord *tempArray1[(count/2)];
     struct MovieRecord *tempArray2[(count - (count/2))];
     
@@ -187,45 +195,73 @@ void mergeSort(int count, struct MovieRecord **sourceArray, struct MovieRecord *
     } else {
         // initialize tempArray1 to hold first half of MovieRecords
         initializeArrayOfMovies((count/2), tempArray1);
-        //printf("initialization of tempArray1 success...\n");
+
         // initialize tempArray2 to hold last half of MovieRecords
         initializeArrayOfMovies((count - (count/2)), tempArray2);
-        //printf("initialization of tempArray2 success...\n");
 
-        //printf("\nEntering mergeSort for first half\n");
         // sort first half
-        mergeSort((count/2), sourceArray, tempArray1);
-        //printf("\nEntering mergeSort for second half\n");
+        mergeSort((count/2), columnName, sourceArray, tempArray1);
+
         // sort second half
-        mergeSort((count - (count/2)), (sourceArray + (count/2)), tempArray2);
+        mergeSort((count - (count/2)), columnName, (sourceArray + (count/2)), tempArray2);
 
-        /** ADD SWITCH STATEMENTS TO CALL MERGE FOR SPECIFIC TYPES, char, numeric, date? **/
-        merge((count/2), tempArray1, (count - (count/2)), tempArray2, outputArray);
-
-        //free(tempArray1);
-        //free(tempArray2);
+        merge((count/2), columnName, tempArray1, (count - (count/2)), tempArray2, outputArray);
     }
 
     return;
 }
 
-void merge(int count1, struct MovieRecord **tempArray1, int count2, struct MovieRecord **tempArray2, struct MovieRecord **outputArray)
+void merge(int count1, const char *columnName, struct MovieRecord **tempArray1, int count2, struct MovieRecord **tempArray2, struct MovieRecord **outputArray)
 {
     int index1 = 0;
     int index2 = 0;
     int indexOutput = 0;
+    int compareValue = 0;
 
     while (index1 < count1 || index2 < count2)
     {
-        if (index2 >= count2 || ((index1 < count1) && (tempArray1[index1]->number < tempArray2[index2]->number)))
+        if (strcmp(columnName, "number") == 0) 
         {
-            // tempArray1 exists and is smaller
-            // swap pointers
-            outputArray[indexOutput++] = tempArray1[index1++];
-        } else {
-            // tempArray1 doesn't exist OR is larger than tempArray2[index2]
-            // swap pointers
-            outputArray[indexOutput++] = tempArray2[index2++];
+            if (index2 >= count2 || ((index1 < count1) && (tempArray1[index1]->number < tempArray2[index2]->number)))
+            {
+                // tempArray1 exists and is smaller
+                // swap pointers
+                outputArray[indexOutput++] = tempArray1[index1++];
+            } else {
+                // tempArray1 doesn't exist OR is larger than tempArray2[index2]
+                // swap pointers
+                outputArray[indexOutput++] = tempArray2[index2++];
+            }
+        } else if (strcmp(columnName, "color") == 0) {
+            if (index2 >= count2 || ((index1 < count1) && (strcmp(tempArray1[index1]->color, tempArray2[index2]->color) < 0)))
+                outputArray[indexOutput++] = tempArray1[index1++];
+            else
+                outputArray[indexOutput++] = tempArray2[index2++];
+        } else if (strcmp(columnName, "animal") == 0) {
+            if (index2 >= count2 || ((index1 < count1) && (strcmp(tempArray1[index1]->animal, tempArray2[index2]->animal) < 0)))
+                outputArray[indexOutput++] = tempArray1[index1++];
+            else
+                outputArray[indexOutput++] = tempArray2[index2++];
         }
     }
+
+    return;
 }
+
+int isValidArguments(int argc, char **argv)
+{
+    if (argc != 3)
+    {
+        fprintf(stderr, "Fatal Error:\tInvalid Number of Arguments.\n");
+        return -1;
+    } else if (strcmp(argv[1], "-c") != 0) {
+        fprintf(stderr, "Fatal Error:\tInvalid Sort Flag. Expected \"-c\"\n");
+        return -1;
+    } else if ((strcmp(argv[2], "animal") != 0) && (strcmp(argv[2], "color") != 0) && (strcmp(argv[2], "number") != 0)) {
+        fprintf(stderr, "Fatal Error:\t%s is Not a Valid ColumnName.\n", argv[2]);
+        return -1;
+    }
+
+    return 0;
+}
+

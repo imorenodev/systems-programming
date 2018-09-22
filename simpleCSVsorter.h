@@ -26,9 +26,10 @@ void printMovieRecords(int count, struct MovieRecord **arrayOfMovieRecords);
 void getArrayOfTokens(char **arrayOfTokens, char * line, const char *delimiter);
 int getLine(char line[], int maxLength);
 void initializeArrayOfMovies(int numberOfRecords, struct MovieRecord **arrayOfMovies);
-void mergeSort(int count, struct MovieRecord **sourceArray, struct MovieRecord **outputArray); 
-void merge(int count1, struct MovieRecord **tempArray1, int count2, struct MovieRecord **tempArray2, struct MovieRecord **outputArray);
+void mergeSort(int count, const char *columnName, struct MovieRecord **sourceArray, struct MovieRecord **outputArray); 
+void merge(int count1, const char *columnName, struct MovieRecord **tempArray1, int count2, struct MovieRecord **tempArray2, struct MovieRecord **outputArray);
 void copyArrayOfMovies(int count, struct MovieRecord **overSizedArray, struct MovieRecord **correctSizeArray);
+int isValidArguments(int argc, char **argv);
 
 
 #endif

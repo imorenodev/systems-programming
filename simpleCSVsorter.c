@@ -14,7 +14,7 @@ struct MovieRecord {
 
 void printArguments(int argCount, char *argArray[]);
 void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArrayOfMovieRecords);
-char **getArrayOfTokens(char * stringBuffer, const char *delimiter);
+void getArrayOfTokens(char **arrayOfTokens, char * line, const char *delimiter);
 int getLine(char line[], int maxLength);
 
 
@@ -23,52 +23,28 @@ int main(int argc, char *argv[])
     //printArguments(argc, argv);
     
     // create array that holds 10 movieRecord pointers (10 pointers that each point to a movieRecord)
-    struct MovieRecord **arrayOfMovieRecords = malloc(sizeof(struct MovieRecord *) * MAX_NUM_RECORDS);
+    //struct MovieRecord **arrayOfMovieRecords = malloc(sizeof(struct MovieRecord *) * MAX_NUM_RECORDS);
+    struct MovieRecord *arrayOfMovies[10];
 
-    if (arrayOfMovieRecords == NULL)
+    for (int i = 0; i < MAX_NUM_RECORDS+1; i++)
     {
-        fprintf(stderr, "Malloc Failed to allocate memory for arrayOfMovieRecords");
-        return -1;
+        arrayOfMovies[i] = malloc(sizeof(struct MovieRecord));
     }
+    arrayOfMovies[0]->color = malloc(sizeof(char)*sizeof("orange"));
+    arrayOfMovies[0]->animal= malloc(sizeof(char)*sizeof("horse"));
+    strcpy(arrayOfMovies[0]->color, "orange");
+    arrayOfMovies[0]->number = 99;
+    strcpy(arrayOfMovies[0]->animal, "horse");
+    printf("TESTING color:%s\tnumber:%d\tanimal:%s\n", arrayOfMovies[0]->color, arrayOfMovies[0]->number, arrayOfMovies[0]->animal);
 
-    /*
-    struct MovieRecord *pMovieA = malloc(sizeof(struct MovieRecord *));
-    struct MovieRecord movieA = { "red", 10, "turtle" };
-    pMovieA = &movieA;
-    arrayOfMovieRecords[0] = pMovieA;
-
-    struct MovieRecord movieB = { "green", 90, "bear" };
-    arrayOfMovieRecords[1] = &movieB;
-
-    struct MovieRecord *pMovieC = malloc(sizeof(struct MovieRecord *));
-    pMovieC->color = "red";
-    pMovieC->number = 777;
-    pMovieC->animal= "BULL";
-    arrayOfMovieRecords[2] = pMovieC;
-
-    struct MovieRecord *pMovieD = malloc(sizeof(struct MovieRecord *));
-    struct MovieRecord movieD = { "blue", 5, "cow" };
-    pMovieD = &movieD;
-    arrayOfMovieRecords[3] = pMovieD;
-
-    for (int j = 0; j < 5; j++) 
-    {
-        struct MovieRecord *pTempMovieRecord = malloc(sizeof(struct MovieRecord));
-        pTempMovieRecord->color = "red";
-        pTempMovieRecord->number= j;
-        pTempMovieRecord->animal = "bird";
-        arrayOfMovieRecords[j] = pTempMovieRecord;
-    }
-
-    for (int i = 0; i < 4; i++) 
-    {
-        struct MovieRecord *movie = arrayOfMovieRecords[i];
-        printf("arrayOfMovieRecords[%d]\tcolor: %s\tnumber: %d\tanimal: %s\t\n", i, movie->color, movie->number, movie->animal); 
-        // NULL out the example MovieRecord pointers
-        arrayOfMovieRecords[i] = NULL;
-    }
-    */
- 
+    arrayOfMovies[1]->color = malloc(sizeof(char)*sizeof("orange"));
+    arrayOfMovies[1]->animal= malloc(sizeof(char)*sizeof("horse"));
+    strcpy(arrayOfMovies[1]->color, "orange");
+    arrayOfMovies[1]->number = 99;
+    strcpy(arrayOfMovies[1]->animal, "horse");
+    printf("TESTING color:%s\tnumber:%d\tanimal:%s\n", arrayOfMovies[1]->color, arrayOfMovies[1]->number, arrayOfMovies[1]->animal);
+    
+   
     // get input from csv
     int numberOfMovieRecords = 0;
     char line[MAX_LINE_LENGTH];
@@ -80,31 +56,41 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    for (int i = 0; i < MAX_NUM_RECORDS; i++)
+    int count = 0;
+    while (getLine(line, MAX_LINE_LENGTH) != EOF)
     {
-        while (getLine(line, MAX_LINE_LENGTH) != EOF)
+        getArrayOfTokens(arrayOfTokens, line, DELIMITER);
+        /***DELETE
+        // initilize array to hold each token
+        // declare char[] to hold each token string as it is processed and assign first string returned from strtok
+        char *stringToken = strtok(line, DELIMITER); 
+        int k = 0;
+
+        while (stringToken != NULL)
         {
-            //printf("you typed \"%s\"\n", line);
-            arrayOfTokens = getArrayOfTokens(line, DELIMITER);
-            //printf("arrayOfTokens:\tcolor:%s\tnumber:%s\tanimal:%s\n", arrayOfTokens[0], arrayOfTokens[1], arrayOfTokens[2]);
-
-            struct MovieRecord *pTempMovieRecord = malloc(sizeof(struct MovieRecord));
-            pTempMovieRecord->color = arrayOfTokens[0];
-            pTempMovieRecord->number= atoi(arrayOfTokens[1]);
-            pTempMovieRecord->animal = arrayOfTokens[2];
-            arrayOfMovieRecords[i] = pTempMovieRecord;
-
-            //printf("%s,%d,%s\n", arrayOfMovieRecords[i]->color, arrayOfMovieRecords[i]->number, arrayOfMovieRecords[i]->animal);
-            numberOfMovieRecords++;
+            arrayOfTokens[k] = (char *)malloc(sizeof(strlen(stringToken)+1)*sizeof(char));
+            strcpy(arrayOfTokens[k], stringToken);
+            stringToken = strtok(NULL, DELIMITER);
+            k++;
         }
+        DELETE***/
 
+        char *colorString = arrayOfTokens[0];
+        char *animalString = arrayOfTokens[2];
+
+        arrayOfMovies[count]->color = malloc(sizeof(char) * strlen(colorString));
+        strcpy(arrayOfMovies[count]->color, colorString);
+
+        arrayOfMovies[count]->number = atoi(arrayOfTokens[1]);
+
+        arrayOfMovies[count]->animal = malloc(sizeof(char) * strlen(animalString));
+        strcpy(arrayOfMovies[count]->animal, animalString);
+
+        count++;
     }
 
-    for (int i = 0; i < numberOfMovieRecords; i++)
-    {
-        printf("%s,%d,%s\n", arrayOfMovieRecords[i]->color, arrayOfMovieRecords[i]->number, arrayOfMovieRecords[i]->animal);
-    }
-    //printMovieRecords(arrayOfMovieRecords, numberOfMovieRecords);
+    printMovieRecords(arrayOfMovies, count);
+
 
     return 0;
 }
@@ -121,12 +107,10 @@ void printArguments(int argCount, char *argArray[])
     return;
 }
 
-char **getArrayOfTokens(char *stringBuffer, const char *delimiter)
+void getArrayOfTokens(char **arrayOfTokens, char *line, const char *delimiter)
 {
-    // initilize array to hold each token
-    char **arrayOfTokens = (char **)malloc(sizeof(char *)*30); 
     // declare char[] to hold each token string as it is processed and assign first string returned from strtok
-    char *stringToken = strtok(stringBuffer, delimiter); 
+    char *stringToken = strtok(line, delimiter); 
 
     int i = 0;
 
@@ -138,7 +122,7 @@ char **getArrayOfTokens(char *stringBuffer, const char *delimiter)
         i++;
     }
 
-    return arrayOfTokens;
+    return;
 }
 
 void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArrayOfMovieRecords)
@@ -156,7 +140,7 @@ void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArr
 int getLine(char line[], int maxLength)
 {
     int index = 0;
-    char aChar;
+    int aChar;
     // want to leave space for '\0'
     int maxStringLength = maxLength - 1;
 

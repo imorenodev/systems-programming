@@ -11,4 +11,4 @@ white,942,bear
 cyan,432,squirrel
 cerulean,122,dog
 toupe,22222,pig
-magenta,093,sheep
+magenta,99,sheep

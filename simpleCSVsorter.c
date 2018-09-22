@@ -54,18 +54,17 @@ int main(int argc, char *argv[])
     // copy contents of oversized array of MovieRecords to new array of correct size
     copyArrayOfMovies(count, arrayOfMovies, unSortedArrayOfMovies);
 
-    printf("\n** COPIED arrayOfMovies into unSortedArrayOfMovies **\n");
-    printMovieRecords(count, unSortedArrayOfMovies);
-    printf("\n** SUCCESSFULLY COPIED arrayOfMovies into unSortedArrayOfMovies **\n");
-
     // create new array of pointers to struct MovieRecords to hold sorted MovieRecords
     struct MovieRecord *sortedArrayOfMovies[count];
     initializeArrayOfMovies(count, sortedArrayOfMovies);
 
     // sort the records and save sorted output in sortedArrayOfMovies
-    //mergeSort(count, arrayOfMovies, sortedArrayOfMovies);
+    mergeSort(count, arrayOfMovies, sortedArrayOfMovies);
 
-    printMovieRecords(count, arrayOfMovies);
+    printf("Orignial Array\n");
+    printMovieRecords(count, unSortedArrayOfMovies);
+    printf("\nSorted Array\n");
+    printMovieRecords(count, sortedArrayOfMovies);
 
     return 0;
 }
@@ -145,6 +144,7 @@ int getLine(char line[], int maxLength)
 
 void initializeArrayOfMovies(int numberOfRecords, struct MovieRecord **arrayOfMovies)
 {
+    //printf("inside initializeArrayOfMovies... numberOfRecords: %d\t pointer to arrayOfMovies: %p\n", numberOfRecords, arrayOfMovies);
     for (int i = 0; i < numberOfRecords; i++)
     {
         arrayOfMovies[i] = malloc(sizeof(struct MovieRecord));
@@ -153,23 +153,77 @@ void initializeArrayOfMovies(int numberOfRecords, struct MovieRecord **arrayOfMo
     return;
 }
 
-void copyArrayOfMovies(int count, struct MovieRecord **overSizedArray, struct MovieRecord **correctSizeArray)
+void copyArrayOfMovies(int count, struct MovieRecord **sourceArray, struct MovieRecord **outputArray)
 {
     for (int i = 0; i < count; i++)
     {
-        // grab temporary strings from overSizedArray so we can count the length for malloc initialization
-        char *colorString = overSizedArray[i]->color;
-        char *animalString = overSizedArray[i]->animal;
+        // grab temporary strings from sourceArray so we can count the length for malloc initialization
+        char *colorString = sourceArray[i]->color;
+        char *animalString = sourceArray[i]->animal;
 
-        correctSizeArray[i]->color = malloc(sizeof(char) * strlen(colorString));
-        strcpy(correctSizeArray[i]->color, colorString);
+        outputArray[i]->color = malloc(sizeof(char) * strlen(colorString));
+        strcpy(outputArray[i]->color, colorString);
 
-        correctSizeArray[i]->number = overSizedArray[i]->number;
+        outputArray[i]->number = sourceArray[i]->number;
 
-        correctSizeArray[i]->animal= malloc(sizeof(char) * strlen(animalString));
-        strcpy(correctSizeArray[i]->animal, animalString);
+        outputArray[i]->animal= malloc(sizeof(char) * strlen(animalString));
+        strcpy(outputArray[i]->animal, animalString);
     }
 
     return;
 }
 
+void mergeSort(int count, struct MovieRecord **sourceArray, struct MovieRecord **outputArray)
+{
+    //printf("count: %d\n", count);
+    struct MovieRecord *tempArray1[(count/2)];
+    struct MovieRecord *tempArray2[(count - (count/2))];
+    
+    if (count < 2) {
+        // sourceArray already sorted
+        copyArrayOfMovies(count, sourceArray, outputArray);
+    } else {
+        // initialize tempArray1 to hold first half of MovieRecords
+        initializeArrayOfMovies((count/2), tempArray1);
+        //printf("initialization of tempArray1 success...\n");
+        // initialize tempArray2 to hold last half of MovieRecords
+        initializeArrayOfMovies((count - (count/2)), tempArray2);
+        //printf("initialization of tempArray2 success...\n");
+
+        //printf("\nEntering mergeSort for first half\n");
+        // sort first half
+        mergeSort((count/2), sourceArray, tempArray1);
+        //printf("\nEntering mergeSort for second half\n");
+        // sort second half
+        mergeSort((count - (count/2)), (sourceArray + (count/2)), tempArray2);
+
+        /** ADD SWITCH STATEMENTS TO CALL MERGE FOR SPECIFIC TYPES, char, numeric, date? **/
+        merge((count/2), tempArray1, (count - (count/2)), tempArray2, outputArray);
+
+        //free(tempArray1);
+        //free(tempArray2);
+    }
+
+    return;
+}
+
+void merge(int count1, struct MovieRecord **tempArray1, int count2, struct MovieRecord **tempArray2, struct MovieRecord **outputArray)
+{
+    int index1 = 0;
+    int index2 = 0;
+    int indexOutput = 0;
+
+    while (index1 < count1 || index2 < count2)
+    {
+        if (index2 >= count2 || ((index1 < count1) && (tempArray1[index1]->number < tempArray2[index2]->number)))
+        {
+            // tempArray1 exists and is smaller
+            // swap pointers
+            outputArray[indexOutput++] = tempArray1[index1++];
+        } else {
+            // tempArray1 doesn't exist OR is larger than tempArray2[index2]
+            // swap pointers
+            outputArray[indexOutput++] = tempArray2[index2++];
+        }
+    }
+}

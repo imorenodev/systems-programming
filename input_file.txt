@@ -2,3 +2,13 @@ orange,2,cow
 red,7,turtle
 blue,6,bird
 yellow,1,fish
+purple,111,tiger
+pink,33,elephant
+green,43,monkey
+brown,1234,beaver
+black,55,hawk
+white,942,bear
+cyan,432,squirrel
+cerulean,122,dog
+toupe,22222,pig
+magenta,093,sheep

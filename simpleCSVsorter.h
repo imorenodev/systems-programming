@@ -8,13 +8,22 @@
 *
 ******/
 
+struct MovieRecord {
+    char *color;
+    int number;
+    char *animal;
+};
+
+void printArguments(int argCount, char *argArray[]);
+void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArrayOfMovieRecords);
+void getArrayOfTokens(char **arrayOfTokens, char * line, const char *delimiter);
+int getLine(char line[], int maxLength);
+
 static const char *DEBUGGING = "**DEBUGGING**\t";
 static const char *DELIMITER= ",";
 static const int MAX_LINE_LENGTH = 512;
-static const int MAX_NUM_RECORDS = 10;
+static const int MAX_NUM_RECORDS = 20;
 static const int MAX_NUM_COLUMNS = 30;
-
-//Suggestion: define a struct that mirrors a record (row) of the data set
 
 
 //Suggestion: prototype a mergesort function

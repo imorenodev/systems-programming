@@ -12,10 +12,8 @@ int main(int argc, char *argv[])
     // create array that holds 10 movieRecord pointers (10 pointers that each point to a movieRecord)
     struct MovieRecord *arrayOfMovies[MAX_NUM_RECORDS];
 
-    for (int i = 0; i < MAX_NUM_RECORDS+1; i++)
-    {
-        arrayOfMovies[i] = malloc(sizeof(struct MovieRecord));
-    }
+    // initialize each MovieRecord pointer to point to an allocated block of memory to hold a struct MovieRecord
+    initializeArrayOfMovies(MAX_NUM_RECORDS, arrayOfMovies);
    
     /*** get input from csv via stdin ***/
     int numberOfMovieRecords = 0;
@@ -28,6 +26,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // process stdin line by line.
+    // tokenize the line.
+    // save tokens in each struct MovieRecord's corresponding members.
     int count = 0;
     while (getLine(line, MAX_LINE_LENGTH) != EOF)
     {
@@ -47,7 +48,24 @@ int main(int argc, char *argv[])
         count++;
     }
 
-    printMovieRecords(arrayOfMovies, count);
+    // create new array of pointers to struct MovieRecords to hold accurate number of MoveRecords
+    struct MovieRecord *unSortedArrayOfMovies[count];
+    initializeArrayOfMovies(count, unSortedArrayOfMovies);
+    // copy contents of oversized array of MovieRecords to new array of correct size
+    copyArrayOfMovies(count, arrayOfMovies, unSortedArrayOfMovies);
+
+    printf("\n** COPIED arrayOfMovies into unSortedArrayOfMovies **\n");
+    printMovieRecords(count, unSortedArrayOfMovies);
+    printf("\n** SUCCESSFULLY COPIED arrayOfMovies into unSortedArrayOfMovies **\n");
+
+    // create new array of pointers to struct MovieRecords to hold sorted MovieRecords
+    struct MovieRecord *sortedArrayOfMovies[count];
+    initializeArrayOfMovies(count, sortedArrayOfMovies);
+
+    // sort the records and save sorted output in sortedArrayOfMovies
+    //mergeSort(count, arrayOfMovies, sortedArrayOfMovies);
+
+    printMovieRecords(count, arrayOfMovies);
 
     return 0;
 }
@@ -82,11 +100,11 @@ void getArrayOfTokens(char **arrayOfTokens, char *line, const char *delimiter)
     return;
 }
 
-void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArrayOfMovieRecords)
+void printMovieRecords(int count, struct MovieRecord **arrayOfMovieRecords)
 {
 
     struct MovieRecord **tempArrayOfMovieRecords = arrayOfMovieRecords;
-    for (int i = 0; i < lengthOfArrayOfMovieRecords; i++)
+    for (int i = 0; i < count; i++)
     {
         printf("%s,%d,%s\n", tempArrayOfMovieRecords[i]->color, tempArrayOfMovieRecords[i]->number, tempArrayOfMovieRecords[i]->animal);
     }
@@ -124,3 +142,34 @@ int getLine(char line[], int maxLength)
 
     return index;
 }
+
+void initializeArrayOfMovies(int numberOfRecords, struct MovieRecord **arrayOfMovies)
+{
+    for (int i = 0; i < numberOfRecords; i++)
+    {
+        arrayOfMovies[i] = malloc(sizeof(struct MovieRecord));
+    }
+
+    return;
+}
+
+void copyArrayOfMovies(int count, struct MovieRecord **overSizedArray, struct MovieRecord **correctSizeArray)
+{
+    for (int i = 0; i < count; i++)
+    {
+        // grab temporary strings from overSizedArray so we can count the length for malloc initialization
+        char *colorString = overSizedArray[i]->color;
+        char *animalString = overSizedArray[i]->animal;
+
+        correctSizeArray[i]->color = malloc(sizeof(char) * strlen(colorString));
+        strcpy(correctSizeArray[i]->color, colorString);
+
+        correctSizeArray[i]->number = overSizedArray[i]->number;
+
+        correctSizeArray[i]->animal= malloc(sizeof(char) * strlen(animalString));
+        strcpy(correctSizeArray[i]->animal, animalString);
+    }
+
+    return;
+}
+

@@ -1,5 +1,12 @@
 #ifndef SIMPLE_CSV_SORTER_H
 #define SIMPLE_CSV_SORTER_H
+#define DEBUGGING           "**DEBUGGING**\t"
+#define DELIMITER           ","
+#define MAX_LINE_LENGTH     512
+#define MAX_NUM_RECORDS     20
+#define MAX_NUM_COLUMNS     30
+
+
 /*****
 *
 *	Define structures and function prototypes for your sorter
@@ -15,17 +22,12 @@ struct MovieRecord {
 };
 
 void printArguments(int argCount, char *argArray[]);
-void printMovieRecords(struct MovieRecord **arrayOfMovieRecords, int lengthOfArrayOfMovieRecords);
+void printMovieRecords(int count, struct MovieRecord **arrayOfMovieRecords);
 void getArrayOfTokens(char **arrayOfTokens, char * line, const char *delimiter);
 int getLine(char line[], int maxLength);
+void initializeArrayOfMovies(int numberOfRecords, struct MovieRecord **arrayOfMovies);
+void mergeSort(int count, struct MovieRecord **sourceArray, struct MovieRecord **outputArray);
+void copyArrayOfMovies(int count, struct MovieRecord **overSizedArray, struct MovieRecord **correctSizeArray);
 
-static const char *DEBUGGING = "**DEBUGGING**\t";
-static const char *DELIMITER= ",";
-static const int MAX_LINE_LENGTH = 512;
-static const int MAX_NUM_RECORDS = 20;
-static const int MAX_NUM_COLUMNS = 30;
-
-
-//Suggestion: prototype a mergesort function
 
 #endif

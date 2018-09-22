@@ -1,6 +1,6 @@
 orange,2,cow
 red,7,turtle
-blue,6,bird
+blue, 6,bird
 yellow,1,fish
 purple,111,tiger
 pink,33,elephant

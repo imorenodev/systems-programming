@@ -83,16 +83,18 @@ void printArguments(int argCount, char *argArray[])
 
 void getArrayOfTokens(char **arrayOfTokens, char *line, const char *delimiter)
 {
-    // declare char[] to hold each token string as it is processed and assign first string returned from strtok
-    char *stringToken = strtok(line, delimiter); 
-
+    char *empty = " ";
+    char *token;
     int i = 0;
 
-    while (stringToken != NULL)
+    while ((token = strsep(&line, delimiter)))
     {
-        arrayOfTokens[i] = (char *)malloc(sizeof(strlen(stringToken)+1)*sizeof(char));
-        strcpy(arrayOfTokens[i], stringToken);
-        stringToken = strtok(NULL, delimiter);
+        if (0 == *token)
+        {
+            token = empty;
+        }
+        arrayOfTokens[i] = (char *)malloc(sizeof(strlen(token)+1)*sizeof(char));
+        strcpy(arrayOfTokens[i], token);
         i++;
     }
 

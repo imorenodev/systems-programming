@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -529,4 +528,3 @@ int isValidArguments(int argc, char **argv)
 
     return 0;
 }
-

@@ -1,10 +1,8 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include "simpleCSVsorter.h"
-
 
 
 int main(int argc, char *argv[])
@@ -26,18 +24,46 @@ int main(int argc, char *argv[])
     /*** get input from csv via stdin ***/
     int numberOfMovieRecords = 0;
     char line[MAX_LINE_LENGTH];
-    char **arrayOfTokens = malloc(sizeof(char *) * MAX_NUM_COLUMNS);
+    //char **arrayOfTokens = malloc(sizeof(char *) * MAX_NUM_COLUMNS);
+    char *arrayOfTokens[MAX_NUM_COLUMNS];
+    char **arrayOfColumnNames = malloc(sizeof(char *) * MAX_NUM_COLUMNS);
 
+    /*
     if (arrayOfTokens == NULL)
     {
         fprintf(stderr, "Malloc Failed to allocate memory for arrayOfTokens");
         return -1;
     }
+    */
 
-    // process stdin line by line.
-    // tokenize the line.
-    // save tokens in each struct MovieRecord's corresponding members.
-    int count = 0;
+    /**** process stdin line by line. ****/
+
+    // first line in csv, this is the header row containing the column names 
+    // should not be inserted into the array of MovieRecords
+    int count;
+    if (getLine(line, MAX_LINE_LENGTH) != EOF)
+    {
+        getArrayOfTokens(arrayOfTokens, line, DELIMITER);
+        
+        // fill array of ColumnNames with imprecise number of elements
+        for (int j = 0; arrayOfTokens[j] != NULL; j++)
+        {
+            printf("string: %s\n", arrayOfTokens[j]);
+            //printf("strlen(arrayOfTokens[j]): %d\n", (int)strlen(arrayOfTokens[j]));
+            //printf("sizeof(arrayOfTokens[j]): %d\n", (int)sizeof(arrayOfTokens[j]));
+            arrayOfColumnNames[j] = malloc(sizeof(char) * strlen(arrayOfTokens[j]));
+            strcpy(arrayOfColumnNames[j], arrayOfTokens[j]);
+            //printf("arrayOfTokens[j]:%s\tarrayOfColumnNames[j]:%s\n", arrayOfTokens[j], arrayOfColumnNames[j]);
+            count++;
+        }
+    }
+    // resize Array of ColumnNames with exact number of elements
+    arrayOfColumnNames = realloc(arrayOfColumnNames, (count*sizeof(char)));
+
+    /** tokenize the line. 
+     * save tokens in each struct MovieRecord's corresponding members.
+     **/
+    count = 0;
     while (getLine(line, MAX_LINE_LENGTH) != EOF)
     {
         getArrayOfTokens(arrayOfTokens, line, DELIMITER);
@@ -57,10 +83,10 @@ int main(int argc, char *argv[])
         char *content_rating =  arrayOfTokens[21];
 
         // initialize malloc as necessary for each MovieRecord member
-        arrayOfMovies[count]->color = malloc(sizeof(char) * strlen(color));
+        arrayOfMovies[count]->color =                       malloc(sizeof(char) * strlen(color));
         strcpy(arrayOfMovies[count]->color, color);
 
-        arrayOfMovies[count]->director_name = malloc(sizeof(char) * strlen(director_name));
+        arrayOfMovies[count]->director_name =               malloc(sizeof(char) * strlen(director_name));
         strcpy(arrayOfMovies[count]->director_name, director_name);
 
         arrayOfMovies[count]->num_critic_for_reviews =      atoi(arrayOfTokens[2]);
@@ -68,44 +94,44 @@ int main(int argc, char *argv[])
         arrayOfMovies[count]->director_facebook_likes =     atoi(arrayOfTokens[4]);
         arrayOfMovies[count]->actor_3_facebook_likes =      atoi(arrayOfTokens[5]);
 
-        arrayOfMovies[count]->actor_2_name = malloc(sizeof(char) * strlen(actor_2_name));
+        arrayOfMovies[count]->actor_2_name =                malloc(sizeof(char) * strlen(actor_2_name));
         strcpy(arrayOfMovies[count]->actor_2_name, actor_2_name);
 
         arrayOfMovies[count]->actor_1_facebook_likes =      atoi(arrayOfTokens[7]);
         arrayOfMovies[count]->gross =                       atoi(arrayOfTokens[8]);
 
-        arrayOfMovies[count]->genres = malloc(sizeof(char) * strlen(genres));
+        arrayOfMovies[count]->genres =                      malloc(sizeof(char) * strlen(genres));
         strcpy(arrayOfMovies[count]->genres, genres);
 
-        arrayOfMovies[count]->actor_1_name = malloc(sizeof(char) * strlen(actor_1_name));
+        arrayOfMovies[count]->actor_1_name =                malloc(sizeof(char) * strlen(actor_1_name));
         strcpy(arrayOfMovies[count]->actor_1_name, actor_1_name);
 
-        arrayOfMovies[count]->movie_title = malloc(sizeof(char) * strlen(movie_title));
+        arrayOfMovies[count]->movie_title =                 malloc(sizeof(char) * strlen(movie_title));
         strcpy(arrayOfMovies[count]->movie_title, movie_title);
 
         arrayOfMovies[count]->num_voted_users =             atoi(arrayOfTokens[12]);
         arrayOfMovies[count]->cast_total_facebook_likes =   atoi(arrayOfTokens[13]);
 
-        arrayOfMovies[count]->actor_3_name = malloc(sizeof(char) * strlen(actor_3_name));
+        arrayOfMovies[count]->actor_3_name =                malloc(sizeof(char) * strlen(actor_3_name));
         strcpy(arrayOfMovies[count]->actor_3_name, actor_3_name);
 
         arrayOfMovies[count]->facenumber_in_poster =        atoi(arrayOfTokens[15]);
 
-        arrayOfMovies[count]->plot_keywords = malloc(sizeof(char) * strlen(plot_keywords));
+        arrayOfMovies[count]->plot_keywords =               malloc(sizeof(char) * strlen(plot_keywords));
         strcpy(arrayOfMovies[count]->plot_keywords, plot_keywords);
 
-        arrayOfMovies[count]->movie_imdb_link = malloc(sizeof(char) * strlen(movie_imdb_link));
+        arrayOfMovies[count]->movie_imdb_link =             malloc(sizeof(char) * strlen(movie_imdb_link));
         strcpy(arrayOfMovies[count]->movie_imdb_link, movie_imdb_link);
 
         arrayOfMovies[count]->num_user_for_reviews =        atoi(arrayOfTokens[18]);
 
-        arrayOfMovies[count]->language = malloc(sizeof(char) * strlen(language));
+        arrayOfMovies[count]->language =                    malloc(sizeof(char) * strlen(language));
         strcpy(arrayOfMovies[count]->language, language);
 
-        arrayOfMovies[count]->country= malloc(sizeof(char) * strlen(country));
+        arrayOfMovies[count]->country =                     malloc(sizeof(char) * strlen(country));
         strcpy(arrayOfMovies[count]->country, country);
 
-        arrayOfMovies[count]->content_rating = malloc(sizeof(char) * strlen(content_rating));
+        arrayOfMovies[count]->content_rating =              malloc(sizeof(char) * strlen(content_rating));
         strcpy(arrayOfMovies[count]->content_rating, content_rating);
 
         arrayOfMovies[count]->budget =                      atoi(arrayOfTokens[22]);
@@ -131,12 +157,10 @@ int main(int argc, char *argv[])
     // sort the records and save sorted output in sortedArrayOfMovies
     mergeSort(count, columnName, arrayOfMovies, sortedArrayOfMovies);
 
-    /**
     printf("Orignial Array\n");
-    printMovieRecords(count, unSortedArrayOfMovies);
-    **/
-    printf("\nSorted Array\n");
-    printMovieRecords(count, sortedArrayOfMovies);
+    printMovieRecords(count, arrayOfColumnNames, unSortedArrayOfMovies);
+    //printf("\nSorted Array\n");
+    //printMovieRecords(count, arrayOfColumnNames, sortedArrayOfMovies);
 
     return 0;
 }
@@ -161,22 +185,37 @@ void getArrayOfTokens(char **arrayOfTokens, char *line, const char *delimiter)
 
     while ((token = strsep(&line, delimiter)))
     {
+        char *token2 = malloc((strlen(token)+1)*sizeof(char));
         if (0 == *token)
         {
             token = empty;
         }
+
         arrayOfTokens[i] = (char *)malloc(sizeof(strlen(token)+1)*sizeof(char));
-        strcpy(arrayOfTokens[i], token);
+        strncpy(arrayOfTokens[i], token, strlen(token)+1);
+        
+        printf("arrayOfTokens[i]: %s\n", arrayOfTokens[i]);
         i++;
     }
+    //printf("arrayOfTokens[2]: %s\n", arrayOfTokens[2]);
 
     return;
 }
 
-void printMovieRecords(int count, struct MovieRecord **arrayOfMovieRecords)
+void printMovieRecords(int count, char **arrayOfColumnNames, struct MovieRecord **arrayOfMovieRecords)
 {
-
     struct MovieRecord **tempA = arrayOfMovieRecords;
+
+    // print row of ColumnNames first
+    int j = 0;
+    while (arrayOfColumnNames[j+2] != NULL)
+    {
+        printf("%s,", arrayOfColumnNames[j]);
+        j++;
+    }
+    // last columnName should not be printed with trailing comma ',' and needs a newline '\n'
+    printf("%s\n", arrayOfColumnNames[j]);
+
     for (int i = 0; i < count; i++)
     {
         printf("%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%.2f,%.2f,%d\n",

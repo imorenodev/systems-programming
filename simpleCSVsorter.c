@@ -24,17 +24,8 @@ int main(int argc, char *argv[])
     /*** get input from csv via stdin ***/
     int numberOfMovieRecords = 0;
     char line[MAX_LINE_LENGTH];
-    //char **arrayOfTokens = malloc(sizeof(char *) * MAX_NUM_COLUMNS);
     char *arrayOfTokens[MAX_NUM_COLUMNS];
     char **arrayOfColumnNames = malloc(sizeof(char *) * MAX_NUM_COLUMNS);
-
-    /*
-    if (arrayOfTokens == NULL)
-    {
-        fprintf(stderr, "Malloc Failed to allocate memory for arrayOfTokens");
-        return -1;
-    }
-    */
 
     /**** process stdin line by line. ****/
 
@@ -48,12 +39,8 @@ int main(int argc, char *argv[])
         // fill array of ColumnNames with imprecise number of elements
         for (int j = 0; arrayOfTokens[j] != NULL; j++)
         {
-            printf("string: %s\n", arrayOfTokens[j]);
-            //printf("strlen(arrayOfTokens[j]): %d\n", (int)strlen(arrayOfTokens[j]));
-            //printf("sizeof(arrayOfTokens[j]): %d\n", (int)sizeof(arrayOfTokens[j]));
             arrayOfColumnNames[j] = malloc(sizeof(char) * strlen(arrayOfTokens[j]));
             strcpy(arrayOfColumnNames[j], arrayOfTokens[j]);
-            //printf("arrayOfTokens[j]:%s\tarrayOfColumnNames[j]:%s\n", arrayOfTokens[j], arrayOfColumnNames[j]);
             count++;
         }
     }
@@ -194,7 +181,6 @@ void getArrayOfTokens(char **arrayOfTokens, char *line, const char *delimiter)
         arrayOfTokens[i] = (char *)malloc(sizeof(strlen(token)+1)*sizeof(char));
         strncpy(arrayOfTokens[i], token, strlen(token)+1);
         
-        printf("arrayOfTokens[i]: %s\n", arrayOfTokens[i]);
         i++;
     }
     //printf("arrayOfTokens[2]: %s\n", arrayOfTokens[2]);

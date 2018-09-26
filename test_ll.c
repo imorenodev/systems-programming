@@ -3,8 +3,12 @@
 #include <string.h>
 #include "movie_record.h"
 
+#define DELIMITER           ","
 
 void printMovieRecord(struct MovieRecord_Node *head);
+void getTokens(struct MovieRecordColumnHeader_Node** pHead, char* line, const char* delimiter);
+char *readToken(char *line, char *buf);
+
 
 int main(int argc, char** argv)
 {
@@ -60,25 +64,116 @@ int main(int argc, char** argv)
   int numberOfCharactersReadIn = 0;
 
   struct MovieRecordColumnHeader_Node** pHead_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node*));
-  struct MovieRecordColumnHeader_Node* head_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
-  // assign the memory address to the head node to the pHead pointer-to-pointer to stuct MovieRecordColumnHeader_Node
-  *pHead_MovieRecordColumnHeader_Node = head_MovieRecordColumnHeader_Node;
-
-  head_MovieRecordColumnHeader_Node->columnHeader = malloc(sizeof(struct MovieRecordColumnHeader));
-  head_MovieRecordColumnHeader_Node->columnHeader->name = malloc(sizeof(char*)*strlen("color") + 1);
-  head_MovieRecordColumnHeader_Node->columnHeader->name = "color";
+  struct MovieRecordColumnHeader_Node* current_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
+  // assign the memory address oo the head node to the pHead pointer-to-pointer to stuct MovieRecordColumnHeader_Node
+  *pHead_MovieRecordColumnHeader_Node = current_MovieRecordColumnHeader_Node;
 
   if ((numberOfCharactersReadIn = getline(&lineBuffer, &lineLength, stdin)) != -1)
   {
+    printf("getline called\n");
+    char* token = malloc(sizeof(char*)*100);
+
+    while (*lineBuffer)
+    {
+      printf("\nlineBuffer: %s\n", lineBuffer);
+      lineBuffer = readToken(lineBuffer, token);
+      printf("token: %s\n", token);
+
+      //for the MovieRecordColumnHeader that is at the location currently pointed to by current_MovieRecordColumnHeader_Node
+      //set it's columnHeader's name
+      current_MovieRecordColumnHeader_Node->columnHeader = malloc(sizeof(struct MovieRecordColumnHeader));
+      current_MovieRecordColumnHeader_Node->columnHeader->name = malloc(sizeof(char*) * (strlen(token) + 1));
+      strcpy(current_MovieRecordColumnHeader_Node->columnHeader->name, token);
+      current_MovieRecordColumnHeader_Node->next = NULL;
+
+      // if there are still tokens left to process, then create a new MovieRecordColumnHeader_Node and append to LL
+      if (lineBuffer != NULL)
+      {
+        // allocate memory for a new MovieRecordColumnHeader_Node and store it's address in tempMovieRecordColumnHeader_Node
+        struct MovieRecordColumnHeader_Node* tempMovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
+        // for the MovieRecordColumnHeader that is at the location currently pointed to by current_MovieRecordColumnHeader_Node
+        // set it's next node to point to the address of the new MovieRecordColumnHeader_Node pointed to by tempMovieRecordColumnHeader_Node
+        current_MovieRecordColumnHeader_Node->next = tempMovieRecordColumnHeader_Node;
+        // now assign the pointer variable named current_MovieRecordColumnHeader_Node the new address stored in tempMovieRecordColumnHeader_Node
+        current_MovieRecordColumnHeader_Node = tempMovieRecordColumnHeader_Node;
+      }
+
+    }
 
   }
 
 
-  while((numberOfCharactersReadIn = getline(&lineBuffer, &lineLength, stdin)) != -1)
+  /*************************
+  ** PRINT COLUMN HEADERS **
+  *************************/
+  struct MovieRecordColumnHeader_Node* curr_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
+  curr_MovieRecordColumnHeader_Node = *pHead_MovieRecordColumnHeader_Node;
+  while (curr_MovieRecordColumnHeader_Node->columnHeader != NULL)
   {
-    printf("length of line read in: %d\n", numberOfCharactersReadIn);
-    printf("line read in: %s", lineBuffer);
+    printf("curr_MovieRecordColumnHeader_Node: %s\n", curr_MovieRecordColumnHeader_Node->columnHeader->name);
+    if (curr_MovieRecordColumnHeader_Node->next != NULL)
+      curr_MovieRecordColumnHeader_Node = curr_MovieRecordColumnHeader_Node->next;
+    else
+      break;
   }
+
+
+  // while((numberOfCharactersReadIn = getline(&lineBuffer, &lineLength, stdin)) != -1)
+  // {
+  //   printf("length of line read in: %d\n", numberOfCharactersReadIn);
+  //   printf("line read in: %s", lineBuffer);
+  // }
 
   return 0;
+}
+
+
+char *readToken(char *lineBuffer, char *tokenBuffer)
+{
+    int inString = -1;   // track whether we are in a string
+    char *charPtr = lineBuffer;
+
+    while (*charPtr)
+    {
+        //printf("charPtr: %s\n", charPtr);
+        if (inString == 0)
+        {
+            if (*charPtr == '"')
+            {
+                char nextChar = *++charPtr;
+                if (nextChar == '"')
+                {        // escaped double quote
+                    *tokenBuffer++ = '"';
+                } else {
+                    *tokenBuffer = '\0';
+                    charPtr--;
+                    inString = -1;
+                }
+            } else {
+              *tokenBuffer++ = *charPtr;
+            }
+        } else switch (*charPtr) {
+            case '"' :
+              inString = 0;
+              break;
+            case ',' :
+              charPtr++;
+              *tokenBuffer = '\0';
+              return(charPtr);
+            case '\t' :
+            case '\n' :
+            case '\r' :
+              break;
+            default :
+              *tokenBuffer++ = *charPtr;
+        }
+        charPtr++;
+    }
+    *tokenBuffer = '\0';
+    return(charPtr);
+}
+
+void getTokens(struct MovieRecordColumnHeader_Node** pHead, char* line, const char* delimiter)
+{
+    return;
 }

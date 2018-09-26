@@ -1,37 +1,50 @@
 #ifndef MOVIE_RECORD
 #define MOVIE_RECORD
 
-enum Type { INTS, FLOATS, STRING }
 
-typedef struct Data {
-  Type s_type;
+enum Type { INTS, FLOATS, STRING };
+
+struct MovieData {
+  enum Type dataType;
   int i;
   float f;
   char* s;
-} Data_T;
+};
 
-typedef struct MovieDataPoint {
+struct MovieDataColumn {
   char* columnName;
-  struct Data_T* data;
-} MovieDataPoint_T;
+  struct MovieData* data;
+};
 
-typdef struct MovieDataPoint_Node {
-  //MovieDataPoint data
-  MovieDataPoint_T dataPoint;
-  // pointer to next node in the Linked List of MovieRecord DataPoints
-  struct MovieDataPoint_Node_T* next;
-} MovieDataPoint_Node_T;
+struct MovieDataColumn_Node {
+  //MovieDataColumn data
+  struct MovieDataColumn* dataColumn;
+  // pointer to next node in the Linked List of MovieRecord DataColumn
+  struct MovieDataColumn_Node* next;
+};
 
-typdef struct MovieRecord {
-  struct MovieDataPoint_Node_T* next
-} MovieRecord_T;
+struct MovieRecord {
+  // pointer-to-pointer to first MovieDataColumn_Node in the LL
+  struct MovieDataColumn_Node** pHead_MovieDataColumn_Node;
+};
 
-typedef struct MovieRecord_Node {
+struct MovieRecord_Node {
   // MovieRecord data
-  MovieRecord_T record;
+  struct MovieRecord* record;
   // pointer to next node in the Linked List of MovieRecords
   struct MovieRecord_Node* next;
-} MovieRecord_Node_T;
+};
+
+struct MovieRecordColumnHeader {
+  char* name;
+};
+
+struct MovieRecordColumnHeader_Node {
+  // MovieRecord data
+  struct MovieRecordColumnHeader* columnHeader;
+  // pointer to next node in the Linked List of MovieRecords
+  struct MovieRecordColumnHeader_Node* next;
+};
 
 
 #endif

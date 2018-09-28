@@ -6,158 +6,134 @@
 #define DELIMITER           ","
 
 void printMovieRecord(struct MovieRecord_Node *head);
-char *readToken(char *line, char *buf);
-enum Type getType(int columnHeaderIndex);
+char *readToken(char *lineBuffer, char *tokenBuffer);
+enum Type getType(char *columnHeaderIndex);
 
 
 int main(int argc, char** argv)
 {
-  // // pointer to the head node of MovieRecord LL
-  // struct MovieRecord_Node** pHead_MovieRecord_Node = malloc(sizeof(struct MovieRecord_Node*));
-  // // declare and initialize the first (head) node of the LL
-  // struct MovieRecord_Node* head_MovieRecord_Node = malloc(sizeof(struct MovieRecord_Node));
-  // // assign the memory address to the head node to the pHead pointer-to-pointer to stuct MovieRecord_Node
-  // *pHead_MovieRecord_Node = head_MovieRecord_Node;
-  //
-  // // dereference the pointer-to-pointer of head MovieRecord_Node and allocate memory
-  // (*pHead_MovieRecord_Node)->record = malloc(sizeof(struct MovieRecord));
-  // // allocate memory for the pointer-to-pointer to the head MovieDataColumn_Node
-  // (*pHead_MovieRecord_Node)->record->pHead_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node*));
-  // // declare and initialize head_MovieDataColumn_Node
-  // struct MovieDataColumn_Node* head_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
-  // head_MovieDataColumn_Node->dataColumn = malloc(sizeof(struct MovieDataColumn));
-  // head_MovieDataColumn_Node->dataColumn->columnName = malloc(sizeof(char*)*strlen("color") + 1);
-  // head_MovieDataColumn_Node->dataColumn->columnName = "color";
-  // head_MovieDataColumn_Node->dataColumn->data = malloc(sizeof(struct MovieData));
-  // head_MovieDataColumn_Node->dataColumn->data->dataType = STRING;
-  // head_MovieDataColumn_Node->dataColumn->data->s = malloc(sizeof(char*)*strlen("black and white") + 1);
-  // head_MovieDataColumn_Node->dataColumn->data->s = "black and white";
-  //
-  // // assign pointer to point to the pointer of the head_MovieDataColumn_Node
-  // (*pHead_MovieRecord_Node)->record->pHead_MovieDataColumn_Node = &head_MovieDataColumn_Node;
-  //
-  // (*pHead_MovieRecord_Node)->next = malloc(sizeof(struct MovieRecord_Node));
-  // (*pHead_MovieRecord_Node)->next->record = malloc(sizeof(struct MovieRecord));
-  // struct MovieRecord* second_MovieRecord = malloc(sizeof(struct MovieRecord));
-  // (*pHead_MovieRecord_Node)->next->record = second_MovieRecord;
-  // second_MovieRecord->pHead_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node*));
-  // struct MovieDataColumn_Node* second_MovieRecord_head_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
-  // second_MovieRecord->pHead_MovieDataColumn_Node = &second_MovieRecord_head_MovieDataColumn_Node;
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn = malloc(sizeof(struct MovieDataColumn));
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->columnName = malloc(sizeof(char*)*strlen("director") + 1);
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->columnName = "director";
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->data = malloc(sizeof(struct MovieData));
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->data->dataType = STRING;
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->data->s = malloc(sizeof(char*)*strlen("James Cameron") + 1);
-  // second_MovieRecord_head_MovieDataColumn_Node->dataColumn->data->s = "James Cameron";
-  //
-  // struct MovieRecord_Node** pCurrent = malloc(sizeof(struct MovieRecord_Node*));
-  // (*pCurrent) = *pHead_MovieRecord_Node;
-  // printf("pCurrent columnName: %s\t data: %s\n", (*(*pCurrent)->record->pHead_MovieDataColumn_Node)->dataColumn->columnName, (*(*pCurrent)->record->pHead_MovieDataColumn_Node)->dataColumn->data->s);
-  // printf("pCurrent columnName: %s\t data: %s\n", (*((*pCurrent)->next)->record->pHead_MovieDataColumn_Node)->dataColumn->columnName, (*((*pCurrent)->next)->record->pHead_MovieDataColumn_Node)->dataColumn->data->s);
-
-
   char* lineBuffer = NULL;
   size_t lineLength = 0;
-  ssize_t read = 0;
-  int numberOfColumns = 0;
+  size_t read = 0;
   int isHeaderRow = 0;
+  char* token = malloc(sizeof(char*)*100);
 
-  /***********************
-  ** GET COLUMN HEADERS **
-  ***********************/
-  // pointer to keep track of first MovieRecordColumnHeader_Node in the LL
-  struct MovieRecordColumnHeader_Node** pHead_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node*));
-  struct MovieRecordColumnHeader_Node* current_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
-  // assign the memory address to the head node to the pHead pointer-to-pointer to stuct MovieRecordColumnHeader_Node
-  *pHead_MovieRecordColumnHeader_Node = current_MovieRecordColumnHeader_Node;
+  /*****************************************
+  ** INITIALIZE COLUMN HEADER LL POINTERS **
+  *****************************************/
+  // pointer to keep track of first ColumnHeader_Node in the LL
+  struct ColumnHeader_Node* pHead_ColumnHeader_Node = malloc(sizeof(struct ColumnHeader_Node));
+  pHead_ColumnHeader_Node->value= NULL;
+  pHead_ColumnHeader_Node->next = NULL;
+  // pointer to keep track of current ColumnHeader_Node in the LL
+  struct ColumnHeader_Node* current_ColumnHeader_Node = malloc(sizeof(struct ColumnHeader_Node));
+  current_ColumnHeader_Node->value= NULL;
+  current_ColumnHeader_Node->next = NULL;
 
-  /**********************
-  ** GET MOVIE RECORDS **
-  **********************/
+  // assign the memory address to the first ColumnHeader node to the pHead_ColumnHeader_Node's ->next
+  pHead_ColumnHeader_Node->next = malloc(sizeof(struct ColumnHeader_Node*));
+  pHead_ColumnHeader_Node->next = current_ColumnHeader_Node;
+
+
+  /****************************************
+  ** INITIALIZE MOVIE RECORD LL POINTERS **
+  ****************************************/
   // pointer to keep track of first MovieRecord_Node in the LL
-  struct MovieRecord_Node** pHead_MovieRecord_Node = malloc(sizeof(struct MovieRecord_Node*));
+  struct MovieRecord_Node* pHead_MovieRecord_Node = malloc(sizeof(struct MovieRecord_Node));
+  pHead_MovieRecord_Node->pHead_MovieDataColumn_Node = NULL;
+  pHead_MovieRecord_Node->next = NULL;
+
+  // pointer to keep track of current MovieRecord_Node in the LL
   struct MovieRecord_Node* current_MovieRecord_Node = malloc(sizeof(struct MovieRecord_Node));
-  // assign the memory address to the head node to the pHead pointer-to-pointer to stuct MovieRecord_Node
-  *pHead_MovieRecord_Node = current_MovieRecord_Node;
+  current_MovieRecord_Node->pHead_MovieDataColumn_Node = NULL;
+  current_MovieRecord_Node->next = NULL;
 
+  // assign the memory address to the first ColumnHeader node to the pHead_ColumnHeader_Node's ->next
+  pHead_MovieRecord_Node->next = malloc(sizeof(struct MovieRecord_Node*));
+  pHead_MovieRecord_Node->next = current_MovieRecord_Node;
 
-  while ((read = getline(&lineBuffer, &lineLength, stdin)) != -1)
+  struct MovieDataColumn_Node* current_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
+  current_MovieDataColumn_Node->dataColumn = NULL;
+  current_MovieDataColumn_Node->next = NULL;
+
+  // printf("pHead_ColumnHeader_Node: %p\n", pHead_ColumnHeader_Node);
+  // printf("pHead_ColumnHeader_Node->next: %p\n", pHead_ColumnHeader_Node->next);
+  // printf("current_ColumnHeader_Node: %p\n", current_ColumnHeader_Node);
+  //
+  // printf("pHead_MovieRecord_Node: %p\n", pHead_MovieRecord_Node);
+  // printf("pHead_MovieRecord_Node->next: %p\n", pHead_MovieRecord_Node->next);
+  // printf("current_MovieRecord_Node: %p\n", current_MovieRecord_Node);
+
+  // get first line of input (outside of the while loop) to handle the header column
+  read = getline(&lineBuffer, &lineLength, stdin);
+  while (read != -1)
   {
-    char* token = malloc(sizeof(char*)*100);
-
     if (isHeaderRow == 0) // get column headers
     {
       while (*lineBuffer)
       {
         lineBuffer = readToken(lineBuffer, token);
 
-        //for the MovieRecordColumnHeader that is at the location currently pointed to by current_MovieRecordColumnHeader_Node
-        //set it's columnHeader's name
-        current_MovieRecordColumnHeader_Node->columnHeader = malloc(sizeof(struct MovieRecordColumnHeader));
-        current_MovieRecordColumnHeader_Node->columnHeader->name = malloc(sizeof(char*) * (strlen(token) + 1));
-        strcpy(current_MovieRecordColumnHeader_Node->columnHeader->name, token);
-        current_MovieRecordColumnHeader_Node->next = NULL;
-        //printf("INSIDE ISHEADERROW: token: %s\tcolumnHeader->name: %s\n", token, current_MovieRecordColumnHeader_Node->columnHeader->name);
+        //for the MovieRecordColumnHeader that is at the location currently pointed to by current_ColumnHeader_Node
+        //set it's columnHeader name
+        current_ColumnHeader_Node->value = malloc(sizeof(char) * (strlen(token) + 1));
+        strcpy(current_ColumnHeader_Node->value, token);
+        current_ColumnHeader_Node->next = NULL;
+        //printf("token: %s\tcurrent_ColumnHeader_Node->value: %s\n", token, current_ColumnHeader_Node->value);
 
-        // if there are still tokens left to process, then create a new MovieRecordColumnHeader_Node and append to LL
+        // if there are still tokens left to process, then create a new ColumnHeader_Node and append to LL
         if (lineBuffer != NULL)
         {
-          // allocate memory for a new MovieRecordColumnHeader_Node and store it's address in tempMovieRecordColumnHeader_Node
-          struct MovieRecordColumnHeader_Node* tempMovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
-          // for the MovieRecordColumnHeader that is at the location currently pointed to by current_MovieRecordColumnHeader_Node
-          // set it's next node to point to the address of the new MovieRecordColumnHeader_Node pointed to by tempMovieRecordColumnHeader_Node
-          current_MovieRecordColumnHeader_Node->next = tempMovieRecordColumnHeader_Node;
-          // now assign the pointer variable named current_MovieRecordColumnHeader_Node the new address stored in tempMovieRecordColumnHeader_Node
-          current_MovieRecordColumnHeader_Node = tempMovieRecordColumnHeader_Node;
-          numberOfColumns++;
+          // set it's next node to point to the address of the new ColumnHeader_Node pointed to by tempColumnHeader_Node
+          current_ColumnHeader_Node->next = malloc(sizeof(struct ColumnHeader_Node));
+          current_ColumnHeader_Node = current_ColumnHeader_Node->next;
         }
       }
+
+      // DONE WITH HEADER COLUMNS
+      // Read next line to prime for the
+      // MovieRecord parsing on the next loop
+
       isHeaderRow = -1;
       lineBuffer = NULL;
-    } else {
-      printf("**GETTING LINE**\n");
-      //for the MovieRecord that is at the location currently pointed to by current_MovieRecord_Node
-      //set it's record
-      current_MovieRecord_Node->record = malloc(sizeof(struct MovieRecord));
-      current_MovieRecord_Node->record->pHead_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node*));
-      // initialize the head MovieDataColumn_Node
-      struct MovieDataColumn_Node* current_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
-      // assign the memory address of the head node to the pHead pointer-to-pointer to stuct MovieDataColumn_Node
-      (*current_MovieRecord_Node->record->pHead_MovieDataColumn_Node) = current_MovieDataColumn_Node;
+      read = getline(&lineBuffer, &lineLength, stdin);
+    } else { // get MovieRecords
+      printf("**HEAD/FIRST current_MovieDataColumn_Node: %p\n", current_MovieDataColumn_Node);
+      //set the record for the MovieRecord that is at the location currently pointed to by current_MovieRecord_Node
+      current_MovieRecord_Node->pHead_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
+      current_MovieRecord_Node->pHead_MovieDataColumn_Node->dataColumn = NULL;
+      current_MovieRecord_Node->pHead_MovieDataColumn_Node->next = malloc(sizeof(struct MovieDataColumn_Node*));
+      current_MovieRecord_Node->pHead_MovieDataColumn_Node->next = current_MovieDataColumn_Node;
 
-      // point current_MovieRecordColumnHeader_Node back to HEAD (start) of columnHeader LL
+      // point current_ColumnHeader_Node back to HEAD (start) of columnHeader LL
       // so we can loop through column header names and assign for each new MovieRecord MovieDataColumn
-      current_MovieRecordColumnHeader_Node = (*pHead_MovieRecordColumnHeader_Node);
+      current_ColumnHeader_Node = pHead_ColumnHeader_Node->next;
 
       while (*lineBuffer)
       {
-
+        //printf("**NEXT current_MovieDataColumn_Node: %p\n", current_MovieDataColumn_Node);
         lineBuffer = readToken(lineBuffer, token);
 
-        char *columnName = malloc(sizeof(char) * (strlen(current_MovieRecordColumnHeader_Node->columnHeader->name) + 1));
-        columnName = current_MovieRecordColumnHeader_Node->columnHeader->name;
-        if (current_MovieRecordColumnHeader_Node->next && current_MovieRecordColumnHeader_Node->next->columnHeader && current_MovieRecordColumnHeader_Node->next->columnHeader->name) {
-          current_MovieRecordColumnHeader_Node = current_MovieRecordColumnHeader_Node->next;
+        char *columnName = malloc(sizeof(char) * (strlen(current_ColumnHeader_Node->value) + 1));
+        strcpy(columnName, current_ColumnHeader_Node->value);
+        if (current_ColumnHeader_Node->next != NULL) {
+          current_ColumnHeader_Node = current_ColumnHeader_Node->next;
         }
-        printf("inside movie record processing: %s\n", columnName);
-
 
         current_MovieDataColumn_Node->dataColumn = malloc(sizeof(struct MovieDataColumn));
-        current_MovieDataColumn_Node->dataColumn->columnName = malloc(sizeof(char*) * (strlen("color") + 1));
-        strcpy(current_MovieDataColumn_Node->dataColumn->columnName, "color");
+        current_MovieDataColumn_Node->dataColumn->columnName = malloc(sizeof(char) * (strlen(columnName) + 1));
+        strcpy(current_MovieDataColumn_Node->dataColumn->columnName, columnName);
 
-        current_MovieDataColumn_Node->dataColumn->data = malloc(sizeof(struct MovieData));
-        current_MovieDataColumn_Node->dataColumn->data->dataType = getType(0);
+        //DO I NEED THIS? current_MovieDataColumn_Node->dataColumn->dataType = malloc(sizeof(enum Type));
+        current_MovieDataColumn_Node->dataColumn->dataType = getType(columnName);
 
-        if (current_MovieDataColumn_Node->dataColumn->data->dataType == STRING)
-        {
-          current_MovieDataColumn_Node->dataColumn->data->s = malloc(sizeof(char*) * (strlen(token) + 1));
-          strcpy(current_MovieDataColumn_Node->dataColumn->data->s, token);
-        } else if (current_MovieDataColumn_Node->dataColumn->data->dataType == FLOATS) {
-          //TODO
-        } else if (current_MovieDataColumn_Node->dataColumn->data->dataType == INTS) {
-          //TODO
+        if (current_MovieDataColumn_Node->dataColumn->dataType == STRING) {
+          current_MovieDataColumn_Node->dataColumn->s = malloc(sizeof(char) * (strlen(token) + 1));
+          strcpy(current_MovieDataColumn_Node->dataColumn->s, token);
+        } else if (current_MovieDataColumn_Node->dataColumn->dataType == FLOATS) {
+          current_MovieDataColumn_Node->dataColumn->f = atof(token);
+        } else if (current_MovieDataColumn_Node->dataColumn->dataType == INTS) {
+          current_MovieDataColumn_Node->dataColumn->i = atoi(token);
         } else {
           fprintf(stderr, "Fatal Error: Invalid MovieData DataType");
           exit(0);
@@ -168,43 +144,176 @@ int main(int argc, char** argv)
         // if there are still tokens left to process, then create a new MovieDataColumn_Node and append to LL
         if (lineBuffer != NULL)
         {
-          // allocate memory for a new MovieDataColumn_Node and store it's address in tempMovieDataColumn_Node
-          struct MovieDataColumn_Node* tempMovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
           // for the MovieDataColumn that is at the location currently pointed to by current_MovieDataColumn_Node
           // set it's next node to point to the address of the new MovieDataColumn_Node pointed to by tempMovieDataColumn_Node
-          current_MovieDataColumn_Node->next = tempMovieDataColumn_Node;
+          current_MovieDataColumn_Node->next = malloc(sizeof(struct MovieDataColumn_Node));
+          //printf("malloced\tcurrent_MovieDataColumn_Node->next: %p\n", current_MovieDataColumn_Node->next);
           // now assign the pointer variable named current_MovieDataColumn_Node the new address stored in tempMovieDataColumn_Node
-          current_MovieDataColumn_Node = tempMovieDataColumn_Node;
+          current_MovieDataColumn_Node = current_MovieDataColumn_Node->next;
+          current_MovieDataColumn_Node->dataColumn = NULL;
+          current_MovieDataColumn_Node->next = NULL;
+          //printf("LOOP\tcurrent_MovieDataColumn_Node: %p\n", current_MovieDataColumn_Node);
         }
+      }
+
+      // Finished with a MovieRecord, prime getLine for next iteration
+      // and create and point to the next (new) MovieRecord Node
+
+      read = getline(&lineBuffer, &lineLength, stdin);
+
+      current_MovieRecord_Node->next = NULL;
+      current_MovieDataColumn_Node = NULL;
+
+      printf("current_MovieRecord_Node %p\n", current_MovieRecord_Node);
+      if (read != -1)
+      {
+        current_MovieRecord_Node->next = malloc(sizeof(struct MovieRecord_Node));
+        current_MovieRecord_Node = current_MovieRecord_Node->next;
+        current_MovieDataColumn_Node = malloc(sizeof(struct MovieDataColumn_Node));
       }
     }
   }
 
 
-  /*************************
-  ** PRINT COLUMN HEADERS **
-  *************************/
-  struct MovieRecordColumnHeader_Node* curr_MovieRecordColumnHeader_Node = malloc(sizeof(struct MovieRecordColumnHeader_Node));
-  curr_MovieRecordColumnHeader_Node = *pHead_MovieRecordColumnHeader_Node;
+  // printf("AFTER FILLING\n");
+  // printf("pHead_ColumnHeader_Node: %p\n", pHead_ColumnHeader_Node);
+  // printf("pHead_ColumnHeader_Node->next: %p\n", pHead_ColumnHeader_Node->next);
+  // printf("current_ColumnHeader_Node: %p\n", current_ColumnHeader_Node);
+  //
+  // printf("pHead_MovieRecord_Node: %p\n", pHead_MovieRecord_Node);
+  // printf("pHead_MovieRecord_Node->next: %p\n", pHead_MovieRecord_Node->next);
+  // printf("current_MovieRecord_Node: %p\n", current_MovieRecord_Node);
 
-  while (curr_MovieRecordColumnHeader_Node->columnHeader != NULL)
+  // PRINT COLUMN HEADERS
+
+  current_ColumnHeader_Node = pHead_ColumnHeader_Node->next;
+
+  while (current_ColumnHeader_Node->value != NULL)
   {
-    printf("%s\n", curr_MovieRecordColumnHeader_Node->columnHeader->name);
-    if (curr_MovieRecordColumnHeader_Node->next != NULL)
+    printf("%s\n", current_ColumnHeader_Node->value);
+    if (current_ColumnHeader_Node->next != NULL)
     {
-      curr_MovieRecordColumnHeader_Node = curr_MovieRecordColumnHeader_Node->next;
+      current_ColumnHeader_Node = current_ColumnHeader_Node->next;
     } else {
       break;
     }
   }
 
+  // PRINT MOVIE RECORDS
+
+  // printf("\nBEFORE PRINT MOVIE RECORDS\n");
+  // printf("current_MovieRecord_Node: %p\n", current_MovieRecord_Node);
+      printf("\n\ncurrent_MovieRecord_Node %p\n", current_MovieRecord_Node);
+  current_MovieRecord_Node = pHead_MovieRecord_Node->next;
+      printf("current_MovieRecord_Node %p\n", current_MovieRecord_Node);
+  // printf("current_MovieRecord_Node: %p\n", current_MovieRecord_Node);
+  // printf("current_MovieRecord_Node->pHead_MovieDataColumn_Node: %p\n", current_MovieRecord_Node->pHead_MovieDataColumn_Node);
+  // printf("current_MovieRecord_Node->pHead_MovieDataColumn_Node->next: %p\n", current_MovieRecord_Node->pHead_MovieDataColumn_Node->next);
+  // printf("current_MovieRecord_Node->pHead_MovieDataColumn_Node->dataColumn: %p\n", current_MovieRecord_Node->pHead_MovieDataColumn_Node->dataColumn);
+  // printf("DESPERATE TEST: %p\n", pHead_MovieRecord_Node->next->pHead_MovieDataColumn_Node->next->dataColumn);
+
+  while (current_MovieRecord_Node != NULL && current_MovieRecord_Node->pHead_MovieDataColumn_Node != NULL)
+  {
+    current_MovieDataColumn_Node = current_MovieRecord_Node->pHead_MovieDataColumn_Node->next;
+
+    printf("MADE IT!\n");
+    while (current_MovieDataColumn_Node != NULL)
+    {
+      if (current_MovieDataColumn_Node->dataColumn != NULL)
+      {
+        if (current_MovieDataColumn_Node->dataColumn->dataType == STRING)
+          printf("columnName: %s, data: %s\n", current_MovieDataColumn_Node->dataColumn->columnName, current_MovieDataColumn_Node->dataColumn->s);
+        else if (current_MovieDataColumn_Node->dataColumn->dataType == INTS)
+          printf("columnName: %s, data: %d\n", current_MovieDataColumn_Node->dataColumn->columnName, current_MovieDataColumn_Node->dataColumn->i);
+        else if (current_MovieDataColumn_Node->dataColumn->dataType == FLOATS)
+          printf("columnName: %s, data: %lf\n", current_MovieDataColumn_Node->dataColumn->columnName, current_MovieDataColumn_Node->dataColumn->f);
+        else {
+          fprintf(stderr, "Fatal Error:\t Invalid DataType.");
+          exit(0);
+        }
+      }
+
+      if (current_MovieDataColumn_Node->next != NULL)
+      {
+        current_MovieDataColumn_Node = current_MovieDataColumn_Node->next;
+      } else {
+        break;
+      }
+    } // end while
+
+    if (current_MovieRecord_Node->next != NULL)
+    {
+      current_MovieRecord_Node = current_MovieRecord_Node->next;
+    } else {
+      break;
+    }
+  }
 
   return 0;
 }
 
-enum Type getType(int columnHeaderIndex)
+enum Type getType(char *columnName)
 {
-  return STRING;
+  if (strcmp(columnName, "color") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "director_name") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "num_critic_for_reviews") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "duration") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "director_facebook_likes") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "actor_3_facebook_likes") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "actor_2_name") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "actor_1_facebook_likes") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "gross") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "genres") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "actor_1_name") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "movie_title") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "num_voted_users") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "cast_total_facebook_likes") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "actor_3_name") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "facenumber_in_poster") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "plot_keywords") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "movie_imdb_link") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "num_user_for_reviews") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "language") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "country") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "content_rating") == 0) {
+    return STRING;
+  } else if (strcmp(columnName, "budget") == 0) {
+    return INTS;
+  }  else if (strcmp(columnName, "title_year") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "actor_2_facebook_likes") == 0) {
+    return INTS;
+  } else if (strcmp(columnName, "imdb_score") == 0) {
+    return FLOATS;
+  } else if (strcmp(columnName, "aspect_ratio") == 0) {
+    return FLOATS;
+  } else if (strcmp(columnName, "movie_facebook_likes") == 0) {
+    return INTS;
+  } else {
+    fprintf(stderr, "Fatal Error:\t Invalid ColumnName.");
+    exit(0);
+  }
 }
 
 char *readToken(char *lineBuffer, char *tokenBuffer)
